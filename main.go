@@ -19,6 +19,8 @@ func UserHandler(w http.ResponseWriter, r *http.Request) {
 		addUser(w, r)
 	case "GET":
 		getPerson(w, r)
+	case "PATCH":
+		updatePerson(w, r)
 	default:
 		w.WriteHeader(http.StatusMethodNotAllowed)
 		fmt.Fprintf(w, "Sorry, only POST methods are supported.")
@@ -54,3 +56,17 @@ func getPerson(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusOK)
 }
 
+func updatePerson(w http.ResponseWriter, r *http.Request) {
+	inputtedFirstName := r.URL.Query().Get("firstName")
+	inputtedSecondName := r.URL.Query().Get("secondName")
+	inputtedEmail := r.URL.Query().Get("email")
+	inputtedDOB := r.URL.Query().Get("dob")
+	err := store.UpdatePersonStorage(inputtedFirstName, inputtedSecondName, inputtedEmail, inputtedDOB)
+	if err != nil {
+		log.Print(err)
+		w.WriteHeader(http.StatusBadRequest)
+		fmt.Fprint(w, err.Error())
+		return
+	}
+	w.WriteHeader(http.StatusOK)
+}

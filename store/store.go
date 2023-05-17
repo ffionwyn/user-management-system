@@ -58,3 +58,19 @@ func GetPerson(email string) (string, string, string, error) {
 	}
 	return Person.firstName, Person.secondName, Person.dob, nil
 }
+
+func UpdatePersonStorage(firstName string, secondName string, email string, dob string) error {
+	validationErr := validateInput(firstName, secondName, email, dob)
+	if validationErr != nil {
+		return validationErr
+	}
+	_, ok := personStorage[email]
+	if !ok {
+		log.Print("person not in storage - failed to update")
+		return fmt.Errorf("person does not exist")
+	}
+	p := newPerson(firstName, secondName, dob)
+	personStorage[email] = p
+	log.Println("Update person successful")
+	return nil
+}
