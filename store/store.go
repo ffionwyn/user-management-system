@@ -8,24 +8,26 @@ import (
 
 type Person struct {
 	firstName string
+	secondName string
 	dob string
 }
 
-func newPerson(firstName string, dob string) Person {
+func newPerson(firstName string, secondName string, dob string) Person {
 	p := Person{
 		firstName: firstName,
+		secondName: secondName,
 		dob: dob,
 	}
 	return p
 }
 
-func AddToStorage(firstName string, email string, dob string) error {
-	validationErr := validateInput(firstName, email, dob)
+func AddToStorage(firstName string, secondName string, email string, dob string) error {
+	validationErr := validateInput(firstName, secondName, email, dob)
 	if validationErr != nil {
 		return validationErr
 	}
 	fmt.Println("Hello " + firstName + " ")
-	p := newPerson(firstName, dob)
+	p := newPerson(firstName, secondName, dob)
 	personStorage[email] = p
 	log.Println("Added to storage successful")
 	return nil
@@ -33,8 +35,11 @@ func AddToStorage(firstName string, email string, dob string) error {
 
 var personStorage = make(map[string]Person)
 
-func validateInput(firstName string, email string, dob string) error {
+func validateInput(firstName string, secondName string, email string, dob string) error {
 	if firstName == "" {
+		return errors.New("missing name parameter")
+	}
+	if secondName == "" {
 		return errors.New("missing name parameter")
 	}
 	if email == "" {
@@ -46,10 +51,10 @@ func validateInput(firstName string, email string, dob string) error {
 	return nil
 }
 
-func GetPerson(email string) (string, string, error) {
+func GetPerson(email string) (string, string, string, error) {
 	Person, found := personStorage[email]
 	if !found {
-		return "", "", fmt.Errorf("person does not exist")
+		return "", "", "", fmt.Errorf("person does not exist")
 	}
-	return Person.firstName, Person.dob, nil
+	return Person.firstName, Person.secondName, Person.dob, nil
 }

@@ -26,10 +26,11 @@ func UserHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func addUser(w http.ResponseWriter, r *http.Request) {
-	inputtedUser := r.URL.Query().Get("firstName")
+	inputtedFirstName := r.URL.Query().Get("firstName")
+	inputtedSecondName := r.URL.Query().Get("secondName")
 	inputtedEmail := r.URL.Query().Get("email")
 	inputtedDOB := r.URL.Query().Get("dob")
-	err := store.AddToStorage(inputtedUser, inputtedEmail, inputtedDOB)
+	err := store.AddToStorage(inputtedFirstName, inputtedSecondName, inputtedEmail, inputtedDOB)
 	if err != nil {
 		log.Print(err)
 		w.WriteHeader(http.StatusBadRequest)
@@ -41,14 +42,14 @@ func addUser(w http.ResponseWriter, r *http.Request) {
 
 func getPerson(w http.ResponseWriter, r *http.Request) {
 	email := r.URL.Query().Get("email")
-	firstName, dob, err := store.GetPerson(email)
+	firstName, secondName, dob, err := store.GetPerson(email)
 	if err != nil {
 		log.Print(err)
 		w.WriteHeader(http.StatusBadRequest)
 		fmt.Fprint(w, err.Error())
 		return
 	}
-	message := fmt.Sprintf("firstName: %s, dob %s", firstName, dob)
+	message := fmt.Sprintf("firstName: %s, secondName: %s, dob %s", firstName, secondName, dob)
 	w.Write([]byte(message))
 	w.WriteHeader(http.StatusOK)
 }
