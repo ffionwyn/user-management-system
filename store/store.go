@@ -74,3 +74,13 @@ func UpdatePersonStorage(firstName string, secondName string, email string, dob 
 	log.Println("Update person successful")
 	return nil
 }
+
+func DeletePerson(email string) error {
+	if _, ok := personStorage[email]; !ok {
+		return errors.New("person (email) does not exist")
+	}
+	delete(personStorage, email)
+	log.Println("Delete person successful")
+	return nil
+}
+

@@ -21,6 +21,8 @@ func UserHandler(w http.ResponseWriter, r *http.Request) {
 		getPerson(w, r)
 	case "PATCH":
 		updatePerson(w, r)
+	case "DELETE":
+		DeletePerson(w, r)
 	default:
 		w.WriteHeader(http.StatusMethodNotAllowed)
 		fmt.Fprintf(w, "Sorry, only POST methods are supported.")
@@ -66,6 +68,17 @@ func updatePerson(w http.ResponseWriter, r *http.Request) {
 		log.Print(err)
 		w.WriteHeader(http.StatusBadRequest)
 		fmt.Fprint(w, err.Error())
+		return
+	}
+	w.WriteHeader(http.StatusOK)
+}
+
+func DeletePerson(w http.ResponseWriter, r *http.Request) {
+	email := r.URL.Query().Get("email")
+	err := store.DeletePerson(email)
+	if err != nil {
+		log.Print(err)
+		w.WriteHeader(http.StatusBadRequest)
 		return
 	}
 	w.WriteHeader(http.StatusOK)
