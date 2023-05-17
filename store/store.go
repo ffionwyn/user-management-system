@@ -7,34 +7,34 @@ import (
 )
 
 type Person struct {
-	email string
+	firstName string
 	dob string
 }
 
-func newPerson(email string, dob string) Person {
+func newPerson(firstName string, dob string) Person {
 	p := Person{
-		email: email,
+		firstName: firstName,
 		dob: dob,
 	}
 	return p
 }
 
-func AddToStorage(name string, email string, dob string) error {
-	validationErr := validateInput(name, email, dob)
+func AddToStorage(firstName string, email string, dob string) error {
+	validationErr := validateInput(firstName, email, dob)
 	if validationErr != nil {
 		return validationErr
 	}
-	fmt.Println("Hello " + name + " ")
-	p := newPerson(email, dob)
-	personStorage[name] = p
+	fmt.Println("Hello " + firstName + " ")
+	p := newPerson(firstName, dob)
+	personStorage[email] = p
 	log.Println("Added to storage successful")
 	return nil
 }
 
 var personStorage = make(map[string]Person)
 
-func validateInput(name string, email string, dob string) error {
-	if name == "" {
+func validateInput(firstName string, email string, dob string) error {
+	if firstName == "" {
 		return errors.New("missing name parameter")
 	}
 	if email == "" {
@@ -46,10 +46,10 @@ func validateInput(name string, email string, dob string) error {
 	return nil
 }
 
-func GetPerson(name string) (string, string, error) {
-	Person, found := personStorage[name]
+func GetPerson(email string) (string, string, error) {
+	Person, found := personStorage[email]
 	if !found {
 		return "", "", fmt.Errorf("person does not exist")
 	}
-	return Person.email, Person.dob, nil
+	return Person.firstName, Person.dob, nil
 }
