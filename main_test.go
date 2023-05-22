@@ -1,6 +1,7 @@
 package main
 
 import (
+	"io/ioutil"
 	"net/http"
 	"net/http/httptest"
 	"testing"
@@ -154,5 +155,33 @@ func TestDeletePerson(t *testing.T) {
 	exists := store.CheckPerson("fgriffiths@example.com")
 	if exists {
 		t.Error("Expected person to be deleted from storage, but returned error")
+	}
+}
+
+func TestServerIntegration(t *testing.T) {
+	go main() // starting the server in a separate goroutine  - using goroutine here so it allows the server to run concurrently with the test
+
+	// make an HTTP request to the server
+	response, err := http.Get("http://localhost:5000/user")
+	if err != nil {
+		t.Fatalf("Failed to make HTTP request: %v", err)
+	}
+	defer response.Body.Close()
+
+	// reading the response body
+	body, err := ioutil.ReadAll(response.Body)
+	if err != nil {
+		t.Fatalf("Failed to read response body: %v", err)
+	}
+
+	// check the response status code
+	if response.StatusCode != http.StatusMethodNotAllowed {
+		t.Errorf("Expected status code %d, got %d", http.StatusMethodNotAllowed, response.StatusCode)
+	}
+
+	// check the response body
+	expectedBody := "Sorry, only POST methods are supported."
+	if string(body) != expectedBody {
+		t.Errorf("Expected response body '%s', got '%s'", expectedBody, string(body))
 	}
 }
