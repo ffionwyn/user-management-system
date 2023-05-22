@@ -84,3 +84,7 @@ func DeletePerson(email string) error {
 	return nil
 }
 
+func CheckPerson(email string) bool {
+	_, exists := personStorage[email]
+	return exists
+}
