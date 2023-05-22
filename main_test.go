@@ -71,3 +71,30 @@ func TestAddUser(t *testing.T) {
 		t.Error("Expected person to be added to storage, but returned error")
 	}
 }
+
+func TestGetPerson(t *testing.T) {
+	// create a new HTTP request with the selected method and path
+	request, _ := http.NewRequest("GET", "/getPerson", nil)
+
+	// set the query params for the request
+	query := request.URL.Query()
+	query.Set("email", "fgriffiths@example.com")
+	request.URL.RawQuery = query.Encode()
+
+	// create a writer to capture the HTTP response
+	responseRecorder := httptest.NewRecorder()
+
+	// call the getPerson function with the request and the writer
+	getPerson(responseRecorder, request)
+
+	// check the response status code
+	if responseRecorder.Result().StatusCode != http.StatusOK {
+		t.Errorf("Expected status code %d, got %d", http.StatusOK, responseRecorder.Result().StatusCode)
+	}
+
+	// check the response body
+	expectedMessage := "firstName: ffion, secondName: griffiths, dob 05/11/1993"
+	if responseRecorder.Body.String() != expectedMessage {
+		t.Errorf("Expected response body '%s', got '%s'", expectedMessage, responseRecorder.Body.String())
+	}
+}
