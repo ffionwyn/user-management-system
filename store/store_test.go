@@ -116,3 +116,33 @@ func TestUpdatePersonStorage(t *testing.T) {
 		}
 	}
 }
+
+func TestDeletePerson(t *testing.T) {
+	firstName := "ffion"
+	secondName := "griffiths"
+	email := "fgriffiths@example.com"
+	dob := "05/11/1993"
+
+	// add a person to storage for testing
+	err := AddToStorage(firstName, secondName, email, dob)
+	if err != nil {
+		t.Errorf("Error adding person to storage: %v", err)
+	}
+
+	// delete the person from storage
+	err = DeletePerson(email)
+	if err != nil {
+		t.Errorf("Error deleting person: %v", err)
+	}
+
+	// try getting the deleted person's details
+	_, _, _, err = GetPerson(email)
+	if err == nil {
+		t.Errorf("Expected error for non-existent person, but got nil")
+	} else {
+		expectedErrorMessage := "person does not exist"
+		if err.Error() != expectedErrorMessage {
+			t.Errorf("Expected error message: %s, got: %s", expectedErrorMessage, err.Error())
+		}
+	}
+}
