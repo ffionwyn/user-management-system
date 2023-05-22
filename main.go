@@ -5,23 +5,26 @@ import (
 	"log"
 	"net/http"
 	"user-management/store"
+
+	"github.com/bmizerany/pat"
 )
 
-var counter int 
-
-
 func main() {
-	http.HandleFunc("/user", UserHandler)
-	http.HandleFunc("/user/:id", UserHandler)
-	http.ListenAndServe(":5000", nil)
-	//http.HandleFunc("/upload", uploadFiles)
-}
+	m := pat.New()
+	m.Get("/user/:id", http.HandlerFunc(UserHandler))
+	m.Post("/new-user", http.HandlerFunc(newUserHandler))
+
+	http.Handle("/", m)
+	err := http.ListenAndServe(":5000", nil)
+	if err != nil {
+		log.Fatal("ListenAndServe: ", err)
+	}
+}	
+
 
 
 func UserHandler(w http.ResponseWriter, r *http.Request) {
 	switch r.Method {
-	case "POST":
-		addUser(w, r)
 	case "GET":
 		getUserByID(w, r)
 	case "PATCH":
@@ -30,7 +33,17 @@ func UserHandler(w http.ResponseWriter, r *http.Request) {
 		DeletePerson(w, r)
 	default:
 		w.WriteHeader(http.StatusMethodNotAllowed)
-		fmt.Fprintf(w, "Sorry, only POST methods are supported.")
+		fmt.Fprintf(w, "Sorry, only POST/GET/PATCH/DELETE methods are supported.")
+	}
+}
+
+func newUserHandler(w http.ResponseWriter, r *http.Request) {
+	switch r.Method {
+	case "POST":
+		addUser(w, r)
+	default:
+		w.WriteHeader(http.StatusMethodNotAllowed)
+		fmt.Fprintf(w, "Sorry, only POST/GET/PATCH/DELETE methods are supported.")
 	}
 }
 
@@ -46,7 +59,6 @@ func addUser(w http.ResponseWriter, r *http.Request) {
 		fmt.Fprint(w, err.Error())
 		return
 	}
-	counter++
 	w.WriteHeader(http.StatusOK)
 }
 
@@ -68,11 +80,12 @@ func getUserByID(w http.ResponseWriter, r *http.Request) {
 }
 
 func updatePerson(w http.ResponseWriter, r *http.Request) {
+	inputtedUserID := r.URL.Query().Get(":id")
 	inputtedFirstName := r.URL.Query().Get("firstName")
 	inputtedSecondName := r.URL.Query().Get("secondName")
 	inputtedEmail := r.URL.Query().Get("email")
 	inputtedDOB := r.URL.Query().Get("dob")
-	err := store.UpdatePersonStorage(inputtedFirstName, inputtedSecondName, inputtedEmail, inputtedDOB)
+	err := store.UpdatePersonStorage(inputtedUserID, inputtedFirstName, inputtedSecondName, inputtedEmail, inputtedDOB)
 	if err != nil {
 		log.Print(err)
 		w.WriteHeader(http.StatusBadRequest)
@@ -83,8 +96,8 @@ func updatePerson(w http.ResponseWriter, r *http.Request) {
 }
 
 func DeletePerson(w http.ResponseWriter, r *http.Request) {
-	email := r.URL.Query().Get("email")
-	err := store.DeletePerson(email)
+	inputtedUserID := r.URL.Query().Get(":id")
+	err := store.DeletePerson(inputtedUserID)
 	if err != nil {
 		log.Print(err)
 		w.WriteHeader(http.StatusBadRequest)
@@ -92,9 +105,3 @@ func DeletePerson(w http.ResponseWriter, r *http.Request) {
 	}
 	w.WriteHeader(http.StatusOK)
 }
-
-
-
-// func uploadFiles() {
-
-// }
