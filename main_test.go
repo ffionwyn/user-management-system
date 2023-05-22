@@ -98,3 +98,33 @@ func TestGetPerson(t *testing.T) {
 		t.Errorf("Expected response body '%s', got '%s'", expectedMessage, responseRecorder.Body.String())
 	}
 }
+
+func TestUpdatePerson(t *testing.T) {
+	// create a new HTTP request with the selected method and path
+	request, _ := http.NewRequest("GET", "/updatePerson", nil)
+
+	// set the query params for the request
+	query := request.URL.Query()
+	query.Set("firstName", "ffion")
+	query.Set("secondName", "griffiths")
+	query.Set("email", "fgriffiths@example.com")
+	query.Set("dob", "05/11/1993")
+	request.URL.RawQuery = query.Encode()
+
+	// create a writer to capture the HTTP response
+	responseRecorder := httptest.NewRecorder()
+
+	// call the updatePerson function with the request and the writer
+	updatePerson(responseRecorder, request)
+
+	// check the response status code
+	if responseRecorder.Result().StatusCode != http.StatusOK {
+		t.Errorf("Expected status code %d, got %d", http.StatusOK, responseRecorder.Result().StatusCode)
+	}
+
+	// verify/validate that the person was updated in storage
+	exists := store.CheckPerson("fgriffiths@example.com")
+	if !exists {
+		t.Error("Expected person to be updated in storage, but returned error")
+	}
+}
