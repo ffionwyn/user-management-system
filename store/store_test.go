@@ -64,4 +64,55 @@ func TestGetPerson(t *testing.T) {
 	}
 }
 
+func TestUpdatePersonStorage(t *testing.T) {
+	firstName := "ffion"
+	secondName := "griffiths"
+	email := "fgriffiths@example.com"
+	dob := "05/11/1993"
 
+	// add a person to storage for testing
+	err := AddToStorage(firstName, secondName, email, dob)
+	if err != nil {
+		t.Errorf("Error adding person to storage: %v", err)
+	}
+
+	// update the person details
+	newFirstName := "minnie"
+	newSecondName := "griffiths"
+	newDOB := "18/11/2018"
+	err = UpdatePersonStorage(newFirstName, newSecondName, email, newDOB)
+	if err != nil {
+		t.Errorf("Error updating person details: %v", err)
+	}
+
+	// get the updated person details
+	getFirstName, getSecondName, getDOB, err := GetPerson(email)
+	if err != nil {
+		t.Errorf("Error getting person details: %v", err)
+	}
+
+	// check that the details match the updated values
+	if getFirstName != newFirstName {
+		t.Errorf("Expected first name: %s, got: %s", newFirstName, getFirstName)
+	}
+
+	if getSecondName != newSecondName {
+		t.Errorf("Expected second name: %s, got: %s", newSecondName, getSecondName)
+	}
+
+	if getDOB != newDOB {
+		t.Errorf("Expected DOB: %s, got: %s", newDOB, getDOB)
+	}
+
+	// try updating details for a non-existent person
+	nonExistentEmail := "nonexistent@example.com"
+	err = UpdatePersonStorage(newFirstName, newSecondName, nonExistentEmail, newDOB)
+	if err == nil {
+		t.Errorf("Expected error for non-existent person, but got nil")
+	} else {
+		expectedErrorMessage := "person does not exist"
+		if err.Error() != expectedErrorMessage {
+			t.Errorf("Expected error message: %s, got: %s", expectedErrorMessage, err.Error())
+		}
+	}
+}
