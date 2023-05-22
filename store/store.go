@@ -6,6 +6,7 @@ import (
 	"log"
 )
 
+var counter int 
 type Person struct {
 	firstName string
 	secondName string
@@ -30,6 +31,7 @@ func AddToStorage(firstName string, secondName string, email string, dob string)
 	p := newPerson(firstName, secondName, dob)
 	personStorage[email] = p
 	log.Println("Added to storage successful")
+	counter++
 	return nil
 }
 
