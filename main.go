@@ -10,6 +10,7 @@ import (
 func main() {
 	http.HandleFunc("/user", UserHandler)
 	http.ListenAndServe(":5000", nil)
+	http.HandleFunc("/upload", uploadFiles)
 }
 
 
@@ -95,4 +96,9 @@ func searchUser(w http.ResponseWriter, r *http.Request) {
 
 	w.WriteHeader(http.StatusOK)
 	fmt.Fprint(w, searchResult)
+}
+
+func uploadFiles() {
+
+	
 }
