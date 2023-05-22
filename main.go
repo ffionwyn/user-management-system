@@ -18,7 +18,12 @@ func UserHandler(w http.ResponseWriter, r *http.Request) {
 	case "POST":
 		addUser(w, r)
 	case "GET":
-		getPerson(w, r)
+		email := r.URL.Query().Get("email")
+		if email != "" {
+			getPerson(w, r)
+		} else {
+			searchUser(w, r)
+		}
 	case "PATCH":
 		updatePerson(w, r)
 	case "DELETE":
@@ -82,4 +87,12 @@ func DeletePerson(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	w.WriteHeader(http.StatusOK)
+}
+
+func searchUser(w http.ResponseWriter, r *http.Request) {
+	email := r.URL.Query().Get("email")
+	searchResult := "result from email search: " + email
+
+	w.WriteHeader(http.StatusOK)
+	fmt.Fprint(w, searchResult)
 }
