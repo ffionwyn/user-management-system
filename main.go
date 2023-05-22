@@ -9,8 +9,10 @@ import (
 
 var counter int 
 
+
 func main() {
 	http.HandleFunc("/user", UserHandler)
+	http.HandleFunc("/user/:id", UserHandler)
 	http.ListenAndServe(":5000", nil)
 	//http.HandleFunc("/upload", uploadFiles)
 }
@@ -21,12 +23,7 @@ func UserHandler(w http.ResponseWriter, r *http.Request) {
 	case "POST":
 		addUser(w, r)
 	case "GET":
-		email := r.URL.Query().Get("email")
-		if email != "" {
-			getPerson(w, r)
-		} else {
-			searchUser(w, r)
-		}
+		getUserByID(w, r)
 	case "PATCH":
 		updatePerson(w, r)
 	case "DELETE":
@@ -53,18 +50,21 @@ func addUser(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusOK)
 }
 
-func getPerson(w http.ResponseWriter, r *http.Request) {
-	email := r.URL.Query().Get("email")
-	firstName, secondName, dob, err := store.GetPerson(email)
+func getUserByID(w http.ResponseWriter, r *http.Request) {
+	id := r.URL.Query().Get(":id")
+	person, err := store.GetPersonByID(id)
 	if err != nil {
 		log.Print(err)
 		w.WriteHeader(http.StatusBadRequest)
 		fmt.Fprint(w, err.Error())
 		return
 	}
-	message := fmt.Sprintf("firstName: %s, secondName: %s, dob %s", firstName, secondName, dob)
-	w.Write([]byte(message))
+
+	response := fmt.Sprintf("firstName: %s, secondName: %s, dob: %s",
+		person.FirstName, person.SecondName, person.DOB)
+
 	w.WriteHeader(http.StatusOK)
+	fmt.Fprint(w, response)
 }
 
 func updatePerson(w http.ResponseWriter, r *http.Request) {
@@ -93,13 +93,7 @@ func DeletePerson(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusOK)
 }
 
-func searchUser(w http.ResponseWriter, r *http.Request) {
-	email := r.URL.Query().Get("email")
-	searchResult := "result from email search: " + email
 
-	w.WriteHeader(http.StatusOK)
-	fmt.Fprint(w, searchResult)
-}
 
 // func uploadFiles() {
 

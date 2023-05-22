@@ -4,89 +4,105 @@ import (
 	"errors"
 	"fmt"
 	"log"
+	"strconv"
 )
 
 var counter int 
+var users []Person
+var personStorage = make(map[string]Person)
 type Person struct {
-	firstName string
-	secondName string
-	dob string
+	ID int
+	FirstName string
+	SecondName string
+	DOB string
 }
 
-func newPerson(firstName string, secondName string, dob string) Person {
+func newPerson(FirstName string, SecondName string, DOB string) Person {
 	p := Person{
-		firstName: firstName,
-		secondName: secondName,
-		dob: dob,
+		FirstName: FirstName,
+		SecondName: SecondName,
+		DOB: DOB,
 	}
 	return p
 }
 
-func AddToStorage(firstName string, secondName string, email string, dob string) error {
-	validationErr := validateInput(firstName, secondName, email, dob)
+func AddToStorage(FirstName string, SecondName string, Email string, DOB string) error {
+	validationErr := validateInput(FirstName, SecondName, Email, DOB)
 	if validationErr != nil {
 		return validationErr
 	}
-	fmt.Println("Hello " + firstName + " ")
-	p := newPerson(firstName, secondName, dob)
-	personStorage[email] = p
+	fmt.Println("Hello " + FirstName + " ")
+	p := newPerson(FirstName, SecondName, DOB)
+	personStorage[Email] = p
 	log.Println("Added to storage successful")
 	counter++
 	return nil
 }
 
-var personStorage = make(map[string]Person)
-
-func validateInput(firstName string, secondName string, email string, dob string) error {
-	if firstName == "" {
+func validateInput(FirstName string, SecondName string, Email string, DOB string) error {
+	if FirstName == "" {
 		return errors.New("missing name parameter")
 	}
-	if secondName == "" {
+	if SecondName == "" {
 		return errors.New("missing name parameter")
 	}
-	if email == "" {
-		return errors.New("missing email parameter")
+	if Email == "" {
+		return errors.New("missing Email parameter")
 	}
-	if dob == "" {
-		return errors.New("missing dob parameter")
+	if DOB == "" {
+		return errors.New("missing DOB parameter")
 	}
 	return nil
 }
 
-func GetPerson(email string) (string, string, string, error) {
-	Person, found := personStorage[email]
+func GetPerson(Email string) (string, string, string, error) {
+	Person, found := personStorage[Email]
 	if !found {
 		return "", "", "", fmt.Errorf("person does not exist")
 	}
-	return Person.firstName, Person.secondName, Person.dob, nil
+	return Person.FirstName, Person.SecondName, Person.DOB, nil
 }
 
-func UpdatePersonStorage(firstName string, secondName string, email string, dob string) error {
-	validationErr := validateInput(firstName, secondName, email, dob)
+func UpdatePersonStorage(FirstName string, SecondName string, Email string, DOB string) error {
+	validationErr := validateInput(FirstName, SecondName, Email, DOB)
 	if validationErr != nil {
 		return validationErr
 	}
-	_, ok := personStorage[email]
+	_, ok := personStorage[Email]
 	if !ok {
 		log.Print("person not in storage - failed to update")
 		return fmt.Errorf("person does not exist")
 	}
-	p := newPerson(firstName, secondName, dob)
-	personStorage[email] = p
+	p := newPerson(FirstName, SecondName, DOB)
+	personStorage[Email] = p
 	log.Println("Update person successful")
 	return nil
 }
 
-func DeletePerson(email string) error {
-	if _, ok := personStorage[email]; !ok {
-		return errors.New("person (email) does not exist")
+func DeletePerson(Email string) error {
+	if _, ok := personStorage[Email]; !ok {
+		return errors.New("person (Email) does not exist")
 	}
-	delete(personStorage, email)
+	delete(personStorage, Email)
 	log.Println("Delete person successful")
 	return nil
 }
 
-func CheckPerson(email string) bool {
-	_, exists := personStorage[email]
+func CheckPerson(Email string) bool {
+	_, exists := personStorage[Email]
 	return exists
+}
+
+func GetPersonByID(id string) (Person, error) {
+	userID, err := strconv.Atoi(id)
+	if err != nil {
+		return Person{}, fmt.Errorf("invalid user ID")
+	}
+
+	if userID <= 0 || userID > counter {
+		return Person{}, fmt.Errorf("user not found")
+	}
+	person := users[userID-1]
+
+	return person, nil
 }
