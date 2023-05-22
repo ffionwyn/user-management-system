@@ -4,7 +4,7 @@ import (
 	"testing"
 )
 
-//Test for adding someone to storage.
+//test for adding someone to storage.
 func TestAddToStorage(t *testing.T) {
 	firstName := "ffion"
 	secondName := "griffiths"
