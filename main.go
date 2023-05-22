@@ -10,7 +10,7 @@ import (
 func main() {
 	http.HandleFunc("/user", UserHandler)
 	http.ListenAndServe(":5000", nil)
-	http.HandleFunc("/upload", uploadFiles)
+	//http.HandleFunc("/upload", uploadFiles)
 }
 
 
@@ -23,7 +23,7 @@ func UserHandler(w http.ResponseWriter, r *http.Request) {
 		if email != "" {
 			getPerson(w, r)
 		} else {
-			searchUser(w, r)
+			searchPerson(w, r)
 		}
 	case "PATCH":
 		updatePerson(w, r)
@@ -31,7 +31,7 @@ func UserHandler(w http.ResponseWriter, r *http.Request) {
 		DeletePerson(w, r)
 	default:
 		w.WriteHeader(http.StatusMethodNotAllowed)
-		fmt.Fprintf(w, "Sorry, only POST methods are supported.")
+		fmt.Fprintf(w, "Sorry, only POST/GET/PATCH/DELETE methods are supported.")
 	}
 }
 
@@ -90,7 +90,7 @@ func DeletePerson(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusOK)
 }
 
-func searchUser(w http.ResponseWriter, r *http.Request) {
+func searchPerson(w http.ResponseWriter, r *http.Request) {
 	email := r.URL.Query().Get("email")
 	searchResult := "result from email search: " + email
 
@@ -98,7 +98,8 @@ func searchUser(w http.ResponseWriter, r *http.Request) {
 	fmt.Fprint(w, searchResult)
 }
 
-func uploadFiles() {
+// func uploadFiles() {
 
-	
-}
+// }
+
+
