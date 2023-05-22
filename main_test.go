@@ -128,3 +128,31 @@ func TestUpdatePerson(t *testing.T) {
 		t.Error("Expected person to be updated in storage, but returned error")
 	}
 }
+
+
+func TestDeletePerson(t *testing.T) {
+	// create a new HTTP request with the selected method and path
+	request, _ := http.NewRequest("GET", "/deletePerson", nil)
+
+	// set the query params for the request
+	query := request.URL.Query()
+	query.Set("email", "fgriffiths@example.com")
+	request.URL.RawQuery = query.Encode()
+
+	// create a writer to capture the HTTP response
+	responseRecorder := httptest.NewRecorder()
+
+	// call the DeletePerson function with the request and the writer
+	DeletePerson(responseRecorder, request)
+
+	// check the response status code
+	if responseRecorder.Result().StatusCode != http.StatusOK {
+		t.Errorf("Expected status code %d, got %d", http.StatusOK, responseRecorder.Result().StatusCode)
+	}
+
+	// verify/validate that the person was deleted from storage
+	exists := store.CheckPerson("fgriffiths@example.com")
+	if exists {
+		t.Error("Expected person to be deleted from storage, but returned error")
+	}
+}
