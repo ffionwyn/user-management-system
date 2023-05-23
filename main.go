@@ -84,7 +84,6 @@ func userContractUpload(c *gin.Context) {
 			c.String(http.StatusBadRequest, "get form err: %s", err.Error())
 			return
 		}
-
 		fileName := filepath.Base(fmt.Sprintf("user-contract-id-%s.pdf", id))
 		if err := c.SaveUploadedFile(file, fileName); err != nil {
 			c.String(http.StatusBadRequest, "upload file err: %s", err.Error())
@@ -92,6 +91,4 @@ func userContractUpload(c *gin.Context) {
 		}
 		c.String(http.StatusOK, "contract uploaded successfully")
 	}
-
-
 
