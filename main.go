@@ -32,6 +32,7 @@ func main() {
 	router.POST("/users", postUser)
 	router.PATCH("/users/:id", updateUser)
 	router.DELETE("/users/:id", deleteUser)
+	router.GET("/users", getAllUsers)
 	router.Run(":5000")
 }
 
@@ -47,6 +48,10 @@ func getUser(c *gin.Context) {
 	response := fmt.Sprintf("firstName: %s, secondName: %s, dob: %s",
 		person.FirstName, person.SecondName, person.DOB)
 		c.IndentedJSON(http.StatusOK, response)
+}
+
+func getAllUsers(c *gin.Context) {
+	c.IndentedJSON(http.StatusOK, store.PersonStorage)
 }
 
 func postUser(c *gin.Context){
