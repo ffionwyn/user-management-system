@@ -8,23 +8,54 @@ import (
 	"os"
 	"user-management/store"
 
-	"github.com/bmizerany/pat"
+	"github.com/gin-gonic/gin"
 )
 
+// func main() {
+// 	m := pat.New()
+// 	m.Get("/user/:id", http.HandlerFunc(UserHandler))
+// 	m.Post("/new-user", http.HandlerFunc(newUserHandler))
+
+// 	http.HandleFunc("/file-upload", fileHandler)
+
+// 	http.Handle("/", m)
+// 	err := http.ListenAndServe(":5000", nil)
+// 	if err != nil {
+// 		log.Fatal("ListenAndServe: ", err)
+// 	}
+// }
+var router = gin.Default()
+
+
 func main() {
-	m := pat.New()
-	m.Get("/user/:id", http.HandlerFunc(UserHandler))
-	m.Post("/new-user", http.HandlerFunc(newUserHandler))
+	router.GET("/users/:id", getUser)
+	router.POST("/users", postUser)
+	router.Run(":5000")
+}
 
-	http.HandleFunc("/file-upload", fileHandler)
+func getUser(c *gin.Context) {
+	id := c.Param("id")
 
-	http.Handle("/", m)
-	err := http.ListenAndServe(":5000", nil)
+	person, err := store.GetPersonByID(id)
 	if err != nil {
-		log.Fatal("ListenAndServe: ", err)
+		log.Print(err)
+		c.IndentedJSON(http.StatusBadRequest, gin.H{"message": "user not found"})
+		return
 	}
-}	
+	response := fmt.Sprintf("firstName: %s, secondName: %s, dob: %s",
+		person.FirstName, person.SecondName, person.DOB)
+		c.IndentedJSON(http.StatusOK, response)
+}
 
+func postUser(c *gin.Context){
+	var newPerson store.Person
+
+	if err := c.BindJSON(&newPerson); err != nil {
+		return
+	}
+	store.PersonStorage["1"] = newPerson
+	c.IndentedJSON(http.StatusCreated, newPerson)
+}
 
 func UserHandler(w http.ResponseWriter, r *http.Request) {
 	switch r.Method {
