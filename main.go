@@ -2,10 +2,9 @@ package main
 
 import (
 	"fmt"
-	"io"
 	"log"
 	"net/http"
-	"os"
+	"path/filepath"
 	"user-management/store"
 
 	"github.com/gin-gonic/gin"
@@ -20,6 +19,7 @@ func main() {
 	router.PATCH("/users/:id", updateUser)
 	router.DELETE("/users/:id", deleteUser)
 	router.GET("/users", getAllUsers)
+	router.POST("/users/contracts/:id", userContractUpload)
 	router.Run(":5000")
 }
 
@@ -76,47 +76,22 @@ func deleteUser(c *gin.Context) {
 	c.IndentedJSON(http.StatusOK, gin.H{})
 }
 
+func userContractUpload(c *gin.Context) {
+	id := c.Param("id")
 
-func fileHandler(w http.ResponseWriter, r *http.Request) {
-	switch r.Method {
-	case "POST":
-	uploadFile(w, r)
-	default:
-	w.WriteHeader(http.StatusMethodNotAllowed)
-		fmt.Fprintf(w, "Sorry, only POST methods are supported.")
-	}
-}
+	file, err := c.FormFile("file")
+		if err != nil {
+			c.String(http.StatusBadRequest, "get form err: %s", err.Error())
+			return
+		}
 
-func uploadFile(w http.ResponseWriter, r *http.Request) {
-	id := r.URL.Query().Get("id")
-	fileName := fmt.Sprintf("user-contracts/user-contract-id-%s.pdf", id)
-
-	r.ParseMultipartForm(10 << 20)
-
-	file, handler, err := r.FormFile("userContract")
-	if err != nil {
-		fmt.Println("Error retrieving the file")
-		fmt.Println(err)
-		return
+		fileName := filepath.Base(fmt.Sprintf("user-contract-id-%s.pdf", id))
+		if err := c.SaveUploadedFile(file, fileName); err != nil {
+			c.String(http.StatusBadRequest, "upload file err: %s", err.Error())
+			return
+		}
+		c.String(http.StatusOK, "contract uploaded successfully")
 	}
 
-	defer file.Close()
-	fmt.Printf("Uploaded file: %+v\n", handler.Filename)
-	fmt.Printf("File size: %+v\n", handler.Size)
-	fmt.Printf("MIME header: %+v\n", handler.Header)
 
-	dst, err := os.Create(fileName)
-	
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
-	defer dst.Close()
-	
-	if _, err := io.Copy(dst, file); err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
 
-	fmt.Fprintf(w, "Successfully uploaded file\n")
-}
