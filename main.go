@@ -30,6 +30,8 @@ var router = gin.Default()
 func main() {
 	router.GET("/users/:id", getUser)
 	router.POST("/users", postUser)
+	router.PATCH("/users/:id", updateUser)
+	router.DELETE("/users/:id", deleteUser)
 	router.Run(":5000")
 }
 
@@ -53,8 +55,33 @@ func postUser(c *gin.Context){
 	if err := c.BindJSON(&newPerson); err != nil {
 		return
 	}
-	store.PersonStorage["1"] = newPerson
+	store.PersonStorage[newPerson.UserID] = newPerson
 	c.IndentedJSON(http.StatusCreated, newPerson)
+}
+
+func updateUser(c *gin.Context) {
+	id := c.Param("id")
+	_, ok := store.PersonStorage[id]
+	if !ok {
+		c.IndentedJSON(http.StatusBadRequest, gin.H{"message": "user not found"})
+		return
+	}
+	var updatedPerson store.Person
+	if err := c.BindJSON(&updatedPerson); err != nil {
+		return
+	}
+	store.PersonStorage[updatedPerson.UserID] = updatedPerson
+	c.IndentedJSON(http.StatusCreated, updatedPerson)
+}
+
+func deleteUser(c *gin.Context) {
+	id := c.Param("id")
+	var err = store.DeletePerson(id)
+	if err != nil {
+		c.IndentedJSON(http.StatusBadRequest, gin.H{"message": "user not found"})
+		return
+	}
+	c.IndentedJSON(http.StatusOK, gin.H{})
 }
 
 func UserHandler(w http.ResponseWriter, r *http.Request) {
