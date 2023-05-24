@@ -88,3 +88,66 @@ func TestGetPerson(t *testing.T) {
 		t.Errorf("Expected empty values, but got: %s, %s, %s", firstName, secondName, dob)
 	}
 }
+
+func TestUpdatePersonStorage(t *testing.T) {
+	UserID := "1"
+	FirstName := "ffion"
+	SecondName := "griffiths"
+	Email := "fgriffiths@example.com"
+	DOB := "05/11/1993"
+	PersonStorage[UserID] = Person{
+		UserID:     UserID,
+		FirstName:  "OldFirstName",
+		SecondName: "OldSecondName",
+		DOB:        "OldDOB",
+	}
+	err := UpdatePersonStorage(UserID, FirstName, SecondName, Email, DOB)
+	if err != nil {
+		t.Errorf("Expected no error, but got: %v", err)
+	}
+	updatedPerson, ok := PersonStorage[UserID]
+	if !ok {
+		t.Errorf("Expected person with UserID %s to exist in storage, but not found", UserID)
+	}
+	if updatedPerson.FirstName != FirstName || updatedPerson.SecondName != SecondName || updatedPerson.DOB != DOB {
+		t.Errorf("Expected person with updated values: %s, %s, %s; but got: %s, %s, %s",
+			FirstName, SecondName, DOB, updatedPerson.FirstName, updatedPerson.SecondName, updatedPerson.DOB)
+	}
+	UserID = "2"
+	err = UpdatePersonStorage(UserID, FirstName, SecondName, Email, DOB)
+	expectedError := fmt.Errorf("person does not exist")
+	if err == nil || err.Error() != expectedError.Error() {
+		t.Errorf("Expected error: %v, but got: %v", expectedError, err)
+	}
+	UserID = "3"
+	FirstName = ""
+	err = UpdatePersonStorage(UserID, FirstName, SecondName, Email, DOB)
+	expectedError = errors.New("missing name parameter")
+	if err == nil || err.Error() != expectedError.Error() {
+		t.Errorf("Expected error: %v, but got: %v", expectedError, err)
+	}
+}
+
+func TestDeletePerson(t *testing.T) {
+	UserID := "1"
+	PersonStorage[UserID] = Person{
+		UserID:     UserID,
+		FirstName:  "ffion",
+		SecondName: "griffiths",
+		DOB:        "05/11/1993",
+	}
+	err := DeletePerson(UserID)
+	if err != nil {
+		t.Errorf("Expected no error, but got: %v", err)
+	}
+	_, exists := PersonStorage[UserID]
+	if exists {
+		t.Errorf("Expected person with UserID %s to be deleted from storage, but found", UserID)
+	}
+	UserID = "2"
+	err = DeletePerson(UserID)
+	expectedError := errors.New("person (userID) does not exist")
+	if err == nil || err.Error() != expectedError.Error() {
+		t.Errorf("Expected error: %v, but got: %v", expectedError, err)
+	}
+}
