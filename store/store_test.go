@@ -151,3 +151,30 @@ func TestDeletePerson(t *testing.T) {
 		t.Errorf("Expected error: %v, but got: %v", expectedError, err)
 	}
 }
+
+func TestGetPersonByID(t *testing.T) {
+	UserID := "1"
+	expectedPerson := Person{
+		UserID:     UserID,
+		FirstName:  "ffion",
+		SecondName: "griffiths",
+		DOB:        "05/11/1993",
+	}
+	PersonStorage[UserID] = expectedPerson
+	person, err := GetPersonByID(UserID)
+	if err != nil {
+		t.Errorf("Expected no error, but got: %v", err)
+	}
+	if person != expectedPerson {
+		t.Errorf("Expected person: %+v, but got: %+v", expectedPerson, person)
+	}
+	NonExistentID := "2"
+	person, err = GetPersonByID(NonExistentID)
+	expectedError := fmt.Errorf("user not found")
+	if err == nil || err.Error() != expectedError.Error() {
+		t.Errorf("Expected error: %v, but got: %v", expectedError, err)
+	}
+	if person != (Person{}) {
+		t.Errorf("Expected empty person, but got: %+v", person)
+	}
+}
