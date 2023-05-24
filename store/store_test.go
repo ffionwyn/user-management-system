@@ -1,174 +1,90 @@
 package store
 
 import (
+	"errors"
+	"fmt"
 	"testing"
 )
 
-//test for adding someone to storage.
-func TestAddToStorage(t *testing.T) {
-	firstName := "ffion"
-	secondName := "griffiths"
-	email := "fgriffiths@example.com"
-	dob := "05/11/1993"
-	err := AddToStorage(firstName, secondName, email, dob)
-	if err != nil {
-		t.Error(`err := AddToStorage(firstName, secondName, email, dob) error when adding to storage, please check inputs`)
+func TestNewPerson(t *testing.T) {
+	expectedUserID := "1"
+	expectedFirstName := "ffion"
+	expectedSecondName := "griffiths"
+	expectedDOB := "05/11/1993"
+
+	p := newPerson(expectedUserID, expectedFirstName, expectedSecondName, expectedDOB)
+	if p.UserID != expectedUserID {
+		t.Errorf("expected UserID %s, but got %s", expectedUserID, p.UserID)
 	}
-	exists := CheckPerson(email)
-	if !exists {
-		t.Error(`Error: person hasn't been added`)
+	if p.FirstName != expectedFirstName {
+		t.Errorf("expected FirstName %s, but got %s", expectedFirstName, p.FirstName)
+	}
+	if p.SecondName != expectedSecondName {
+		t.Errorf("expected SecondName %s, but got %s", expectedSecondName, p.SecondName)
+	}
+	if p.DOB != expectedDOB {
+		t.Errorf("expected DOB %s, but got %s", expectedDOB, p.DOB)
+	}
+}
+
+func TestValidateInput(t *testing.T) {
+	err := ValidateInput("ffion", "griffiths", "fgriffiths@example.com", "05/11/1993")
+	if err != nil {
+		t.Errorf("Expected no error, but got: %v", err)
+	}
+
+	err = ValidateInput("", "griffiths", "fgriffiths@example.com", "05/11/1993")
+	expectedError := errors.New("missing name parameter")
+	if err == nil || err.Error() != expectedError.Error() {
+		t.Errorf("Expected error: %v, but got: %v", expectedError, err)
+	}
+
+	err = ValidateInput("ffion", "", "fgriffiths@example.com", "05/11/1993")
+	expectedError = errors.New("missing name parameter")
+	if err == nil || err.Error() != expectedError.Error() {
+		t.Errorf("Expected error: %v, but got: %v", expectedError, err)
+	}
+
+	err = ValidateInput("ffion", "griffiths", "", "05/11/1993")
+	expectedError = errors.New("missing Email parameter")
+	if err == nil || err.Error() != expectedError.Error() {
+		t.Errorf("Expected error: %v, but got: %v", expectedError, err)
+	}
+
+	err = ValidateInput("John", "Doe", "johndoe@example.com", "")
+	expectedError = errors.New("missing DOB parameter")
+	if err == nil || err.Error() != expectedError.Error() {
+		t.Errorf("Expected error: %v, but got: %v", expectedError, err)
 	}
 }
 
 func TestGetPerson(t *testing.T) {
-	firstName := "ffion"
-	secondName := "griffiths"
-	email := "fgriffiths@example.com"
-	dob := "05/11/1993"
+	UserID := "1"
+	expectedFirstName := "ffion"
+	expectedSecondName := "griffiths"
+	expectedDOB := "05/11/1993"
+	PersonStorage[UserID] = Person{
+		UserID:     UserID,
+		FirstName:  expectedFirstName,
+		SecondName: expectedSecondName,
+		DOB:        expectedDOB,
+	}
 
-	// add a person to storage for testing
-	err := AddToStorage(firstName, secondName, email, dob)
+	firstName, secondName, dob, err := GetPerson(UserID)
 	if err != nil {
-		t.Errorf("Error adding person to storage: %v", err)
+		t.Errorf("Expected no error, but got: %v", err)
 	}
-
-	// get the person details
-	getFirstName, getSecondName, getDOB, err := GetPerson(email)
-	if err != nil {
-		t.Errorf("Error getting person details: %v", err)
+	if firstName != expectedFirstName || secondName != expectedSecondName || dob != expectedDOB {
+		t.Errorf("Expected values: %s, %s, %s; but got: %s, %s, %s",
+			expectedFirstName, expectedSecondName, expectedDOB, firstName, secondName, dob)
 	}
-
-	// check that the get details match the original person
-	if getFirstName != firstName {
-		t.Errorf("Expected first name: %s, got: %s", firstName, getFirstName)
+	UserID = "2"
+	firstName, secondName, dob, err = GetPerson(UserID)
+	expectedError := fmt.Errorf("person does not exist")
+	if err == nil || err.Error() != expectedError.Error() {
+		t.Errorf("Expected error: %v, but got: %v", expectedError, err)
 	}
-
-	if getSecondName != secondName {
-		t.Errorf("Expected second name: %s, got: %s", secondName, getSecondName)
-	}
-
-	if getDOB != dob {
-		t.Errorf("Expected DOB: %s, got: %s", dob, getDOB)
-	}
-
-	// trying getting details for a non-existent person
-	nonExistentEmail := "nonexistent@example.com"
-	_, _, _, err = GetPerson(nonExistentEmail)
-	if err == nil {
-		t.Errorf("Expected error for non-existent person, but got nil")
-	} else {
-		expectedErrorMessage := "Person does not exist"
-		if err.Error() != expectedErrorMessage {
-			t.Errorf("Expected error message: %s, got: %s", expectedErrorMessage, err.Error())
-		}
-	}
-}
-
-func TestUpdatePersonStorage(t *testing.T) {
-	firstName := "ffion"
-	secondName := "griffiths"
-	email := "fgriffiths@example.com"
-	dob := "05/11/1993"
-
-	// add a person to storage for testing
-	err := AddToStorage(firstName, secondName, email, dob)
-	if err != nil {
-		t.Errorf("Error adding person to storage: %v", err)
-	}
-
-	// update the person details
-	newFirstName := "minnie"
-	newSecondName := "griffiths"
-	newDOB := "18/11/2018"
-	err = UpdatePersonStorage(newFirstName, newSecondName, email, newDOB)
-	if err != nil {
-		t.Errorf("Error updating person details: %v", err)
-	}
-
-	// get the updated person details
-	getFirstName, getSecondName, getDOB, err := GetPerson(email)
-	if err != nil {
-		t.Errorf("Error getting person details: %v", err)
-	}
-
-	// check that the details match the updated values
-	if getFirstName != newFirstName {
-		t.Errorf("Expected first name: %s, got: %s", newFirstName, getFirstName)
-	}
-
-	if getSecondName != newSecondName {
-		t.Errorf("Expected second name: %s, got: %s", newSecondName, getSecondName)
-	}
-
-	if getDOB != newDOB {
-		t.Errorf("Expected DOB: %s, got: %s", newDOB, getDOB)
-	}
-
-	// try updating details for a non-existent person
-	nonExistentEmail := "nonexistent@example.com"
-	err = UpdatePersonStorage(newFirstName, newSecondName, nonExistentEmail, newDOB)
-	if err == nil {
-		t.Errorf("Expected error for non-existent person, but got nil")
-	} else {
-		expectedErrorMessage := "person does not exist"
-		if err.Error() != expectedErrorMessage {
-			t.Errorf("Expected error message: %s, got: %s", expectedErrorMessage, err.Error())
-		}
-	}
-}
-
-func TestDeletePerson(t *testing.T) {
-	firstName := "ffion"
-	secondName := "griffiths"
-	email := "fgriffiths@example.com"
-	dob := "05/11/1993"
-
-	// add a person to storage for testing
-	err := AddToStorage(firstName, secondName, email, dob)
-	if err != nil {
-		t.Errorf("Error adding person to storage: %v", err)
-	}
-
-	// delete the person from storage
-	err = DeletePerson(email)
-	if err != nil {
-		t.Errorf("Error deleting person: %v", err)
-	}
-
-	// try getting the deleted person's details
-	_, _, _, err = GetPerson(email)
-	if err == nil {
-		t.Errorf("Expected error for non-existent person, but got nil")
-	} else {
-		expectedErrorMessage := "person does not exist"
-		if err.Error() != expectedErrorMessage {
-			t.Errorf("Expected error message: %s, got: %s", expectedErrorMessage, err.Error())
-		}
-	}
-}
-
-func TestCheckPerson(t *testing.T) {
-	firstName := "ffion"
-	secondName := "griffiths"
-	email := "fgriffiths@example.com"
-	dob := "05/11/1993"
-
-	// add a person to storage for testing
-	err := AddToStorage(firstName, secondName, email, dob)
-	if err != nil {
-		t.Errorf("Error adding person to storage: %v", err)
-	}
-
-	// check if the person exists in the storage
-	exists := CheckPerson(email)
-	if !exists {
-		t.Error("Expected person to exist, but returned error")
-	}
-
-	// Check if a non-existent person exists in the storage
-	nonExistentEmail := "nonexistent@example.com"
-	exists = CheckPerson(nonExistentEmail)
-	if exists {
-		t.Error("Expected person to not exist, but returned error")
+	if firstName != "" || secondName != "" || dob != "" {
+		t.Errorf("Expected empty values, but got: %s, %s, %s", firstName, secondName, dob)
 	}
 }
