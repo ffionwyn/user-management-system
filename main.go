@@ -5,15 +5,26 @@ import (
 	"log"
 	"net/http"
 	"path/filepath"
+	"time"
 	"user-management/store"
 
 	"github.com/gin-gonic/gin"
+	cors "github.com/itsjamie/gin-cors"
 )
 
 var router = gin.Default()
 
 
 func main() {
+	router.Use(cors.Middleware(cors.Config{
+	Origins:        "*",
+	Methods:        "GET, PUT, POST, DELETE",
+	RequestHeaders: "Origin, Authorization, Content-Type",
+	ExposedHeaders: "",
+	MaxAge: 50 * time.Second,
+	Credentials: false,
+	ValidateHeaders: false,
+}))
 	router.GET("/users/:id", getUser)
 	router.POST("/users", postUser)
 	router.PATCH("/users/:id", updateUser)
