@@ -28,7 +28,7 @@ func newPerson(UserID string, FirstName string, SecondName string, DOB string) P
 }
 
 func AddToStorage(FirstName string, SecondName string, Email string, DOB string) error {
-	validationErr := validateInput(FirstName, SecondName, Email, DOB)
+	validationErr := ValidateInput(FirstName, SecondName, Email, DOB)
 	if validationErr != nil {
 		return validationErr
 	}
@@ -40,7 +40,7 @@ func AddToStorage(FirstName string, SecondName string, Email string, DOB string)
 	return nil
 }
 
-func validateInput(FirstName string, SecondName string, Email string, DOB string) error {
+func ValidateInput(FirstName string, SecondName string, Email string, DOB string) error {
 	if FirstName == "" {
 		return errors.New("missing name parameter")
 	}
@@ -65,7 +65,7 @@ func GetPerson(UserID string) (string, string, string, error) {
 }
 
 func UpdatePersonStorage(UserID string, FirstName string, SecondName string, Email string, DOB string) error {
-	validationErr := validateInput(FirstName, SecondName, Email, DOB)
+	validationErr := ValidateInput(FirstName, SecondName, Email, DOB)
 	if validationErr != nil {
 		return validationErr
 	}
