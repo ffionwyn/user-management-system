@@ -15,23 +15,32 @@ import (
 
 var router = gin.Default()
 
+func basicAuth(c *gin.Context) {
+	user, password, hasAuth := c.Request.BasicAuth()
+	if hasAuth && user == "testuser" && password == "testpass" {
+		fmt.Println("user authenticated")
+	} else {
+		c.AbortWithStatusJSON(http.StatusInternalServerError , gin.H{"message": "user not authenticated"})
+		return 
+	}
+}
 
 func main() {
 	router.Use(cors.Middleware(cors.Config{
 	Origins:        "*",
-	Methods:        "GET, PUT, POST, DELETE",
+	Methods:        "GET, PATCH, POST, DELETE",
 	RequestHeaders: "Origin, Authorization, Content-Type",
 	ExposedHeaders: "",
 	MaxAge: 50 * time.Second,
 	Credentials: false,
 	ValidateHeaders: false,
 }))
-	router.GET("/users/:id", getUser)
-	router.POST("/users", postUser)
-	router.PATCH("/users/:id", updateUser)
-	router.DELETE("/users/:id", deleteUser)
-	router.GET("/users", getAllUsers)
-	router.POST("/users/contracts/:id", userContractUpload)
+	router.GET("/users/:id", basicAuth, getUser)
+	router.POST("/users", basicAuth, postUser)
+	router.PATCH("/users/:id", basicAuth,updateUser)
+	router.DELETE("/users/:id", basicAuth,deleteUser)
+	router.GET("/users", basicAuth, getAllUsers)
+	router.POST("/users/contracts/:id", basicAuth,userContractUpload)
 	router.Run(":5000")
 }
 
@@ -104,4 +113,5 @@ func userContractUpload(c *gin.Context) {
 		}
 		c.String(http.StatusOK, "contract uploaded successfully")
 	}
+
 
