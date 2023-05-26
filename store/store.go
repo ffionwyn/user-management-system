@@ -4,78 +4,14 @@ import (
 	"errors"
 	"fmt"
 	"log"
-	"strconv"
 )
 
-var counter int
 var PersonStorage = make(map[string]Person)
 
 type Person struct {
 	FirstName  string
 	SecondName string
 	DOB        string
-}
-
-func newPerson(FirstName string, SecondName string, DOB string) Person {
-	p := Person{
-		FirstName:  FirstName,
-		SecondName: SecondName,
-		DOB:        DOB,
-	}
-	return p
-}
-
-func AddToStorage(FirstName string, SecondName string, Email string, DOB string) error {
-	validationErr := ValidateInput(FirstName, SecondName, Email, DOB)
-	if validationErr != nil {
-		return validationErr
-	}
-	UserID := strconv.Itoa(counter)
-	p := newPerson(FirstName, SecondName, DOB)
-	PersonStorage[UserID] = p
-	counter++
-	log.Println("Added to storage successful")
-	return nil
-}
-
-func ValidateInput(FirstName string, SecondName string, Email string, DOB string) error {
-	if FirstName == "" {
-		return errors.New("missing name parameter")
-	}
-	if SecondName == "" {
-		return errors.New("missing name parameter")
-	}
-	if Email == "" {
-		return errors.New("missing Email parameter")
-	}
-	if DOB == "" {
-		return errors.New("missing DOB parameter")
-	}
-	return nil
-}
-
-func GetPerson(UserID string) (string, string, string, error) {
-	Person, found := PersonStorage[UserID]
-	if !found {
-		return "", "", "", fmt.Errorf("person does not exist")
-	}
-	return Person.FirstName, Person.SecondName, Person.DOB, nil
-}
-
-func UpdatePersonStorage(UserID string, FirstName string, SecondName string, Email string, DOB string) error {
-	validationErr := ValidateInput(FirstName, SecondName, Email, DOB)
-	if validationErr != nil {
-		return validationErr
-	}
-	_, ok := PersonStorage[UserID]
-	if !ok {
-		log.Print("person not in storage - failed to update")
-		return fmt.Errorf("person does not exist")
-	}
-	p := newPerson(FirstName, SecondName, DOB)
-	PersonStorage[UserID] = p
-	log.Println("Update person successful")
-	return nil
 }
 
 func DeletePerson(UserID string) error {
