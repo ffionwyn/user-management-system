@@ -5,6 +5,7 @@ import (
 	"log"
 	"net/http"
 	"path/filepath"
+	"strconv"
 	"time"
 	"user-management/store"
 
@@ -53,12 +54,13 @@ func getAllUsers(c *gin.Context) {
 }
 
 func postUser(c *gin.Context){
+	var newUserID = strconv.Itoa(len(store.PersonStorage)+1)
 	var newPerson store.Person
 
 	if err := c.BindJSON(&newPerson); err != nil {
 		return
 	}
-	store.PersonStorage[newPerson.UserID] = newPerson
+	store.PersonStorage[newUserID] = newPerson
 	c.IndentedJSON(http.StatusCreated, newPerson)
 }
 
@@ -73,7 +75,7 @@ func updateUser(c *gin.Context) {
 	if err := c.BindJSON(&updatedPerson); err != nil {
 		return
 	}
-	store.PersonStorage[updatedPerson.UserID] = updatedPerson
+	store.PersonStorage[id] = updatedPerson
 	c.IndentedJSON(http.StatusCreated, updatedPerson)
 }
 

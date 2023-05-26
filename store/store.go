@@ -11,15 +11,13 @@ var counter int
 var PersonStorage = make(map[string]Person)
 
 type Person struct {
-	UserID     string
 	FirstName  string
 	SecondName string
 	DOB        string
 }
 
-func newPerson(UserID string, FirstName string, SecondName string, DOB string) Person {
+func newPerson(FirstName string, SecondName string, DOB string) Person {
 	p := Person{
-		UserID:     UserID,
 		FirstName:  FirstName,
 		SecondName: SecondName,
 		DOB:        DOB,
@@ -33,7 +31,7 @@ func AddToStorage(FirstName string, SecondName string, Email string, DOB string)
 		return validationErr
 	}
 	UserID := strconv.Itoa(counter)
-	p := newPerson(UserID, FirstName, SecondName, DOB)
+	p := newPerson(FirstName, SecondName, DOB)
 	PersonStorage[UserID] = p
 	counter++
 	log.Println("Added to storage successful")
@@ -74,7 +72,7 @@ func UpdatePersonStorage(UserID string, FirstName string, SecondName string, Ema
 		log.Print("person not in storage - failed to update")
 		return fmt.Errorf("person does not exist")
 	}
-	p := newPerson(UserID, FirstName, SecondName, DOB)
+	p := newPerson(FirstName, SecondName, DOB)
 	PersonStorage[UserID] = p
 	log.Println("Update person successful")
 	return nil
