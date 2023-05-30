@@ -12,6 +12,7 @@ type Person struct {
 	FirstName  string
 	SecondName string
 	DOB        string
+	Email string
 }
 
 func DeletePerson(UserID string) error {

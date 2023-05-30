@@ -53,9 +53,7 @@ func getUser(c *gin.Context) {
 		c.IndentedJSON(http.StatusBadRequest, gin.H{"message": "user not found"})
 		return
 	}
-	response := fmt.Sprintf("firstName: %s, secondName: %s, dob: %s",
-		person.FirstName, person.SecondName, person.DOB)
-		c.IndentedJSON(http.StatusOK, response)
+	c.IndentedJSON(http.StatusOK, person)
 }
 
 func getAllUsers(c *gin.Context) {
