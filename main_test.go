@@ -134,9 +134,20 @@ func TestPostUser(t *testing.T) {
 	}, responsePerson)
 }
 
+// create a new Gin router and register a PATCH route with the path "/users/:id", assigning the updateUser function as the handler.
+// initialize the PersonStorage map in the store package as an empty map.
+// add a user with ID "1" to the PersonStorage map.
+// create a request body JSON string representing the updated user information.
+// create a new response recorder to capture the response.
+// serve the request using the Gin router and capture the response.
+// assert that the response status code captured in the response recorder is equal to http.StatusCreated.
+// declare a variable responsePerson of type store.Person to store the parsed JSON response body.
+// attempt to unmarshal the response body into responsePerson and ensure there are no errors.
+// retrieve the updated user from the PersonStorage map using the key "1" and assign it to the updatedUser variable. Confirm that it exists by checking if ok is true.
+// assert that the updated user's attributes match the expected values by comparing them using assert.Equal for each attribute.
 func TestUpdateUser(t *testing.T) {
 	router := gin.Default()
-	router.PUT("/users/:id", updateUser)
+	router.PATCH("/users/:id", updateUser)
 
 	store.PersonStorage = make(map[string]store.Person)
 	store.PersonStorage["1"] = store.Person{
@@ -152,7 +163,7 @@ func TestUpdateUser(t *testing.T) {
 		"dob": "01/01/2000",
 		"email": "updated@example.com"
 	}`
-	req, _ := http.NewRequest("PUT", "/users/1", strings.NewReader(requestBody))
+	req, _ := http.NewRequest("PATCH", "/users/1", strings.NewReader(requestBody))
 	req.Header.Set("Content-Type", "application/json")
 
 	w := httptest.NewRecorder()
@@ -171,5 +182,29 @@ func TestUpdateUser(t *testing.T) {
 	assert.Equal(t, "updatedSecondName", updatedUser.SecondName)
 	assert.Equal(t, "01/01/2000", updatedUser.DOB)
 	assert.Equal(t, "updated@example.com", updatedUser.Email)
+}
+
+func TestDeleteUser(t *testing.T) {
+	router := gin.Default()
+	router.DELETE("/users/:id", deleteUser)
+
+	store.PersonStorage = make(map[string]store.Person)
+	store.PersonStorage["1"] = store.Person{
+		FirstName:  "ffion",
+		SecondName: "griffiths",
+		DOB:        "05/11/1993",
+		Email:      "ffiongriffiths@example.com",
+	}
+
+	req, _ := http.NewRequest("DELETE", "/users/1", nil)
+
+	w := httptest.NewRecorder()
+
+	router.ServeHTTP(w, req)
+
+	assert.Equal(t, http.StatusOK, w.Code)
+
+	_, ok := store.PersonStorage["1"]
+	assert.False(t, ok)
 }
 
