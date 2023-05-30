@@ -1,8 +1,10 @@
 package main
 
 import (
+	"bytes"
 	"encoding/json"
 	"log"
+	"mime/multipart"
 	"net/http"
 	"net/http/httptest"
 	"strings"
@@ -184,6 +186,15 @@ func TestUpdateUser(t *testing.T) {
 	assert.Equal(t, "updated@example.com", updatedUser.Email)
 }
 
+// create a new Gin router and register a DELETE route with the path "/users/:id", assigning the deleteUser function as the handler.
+// initialize the personStorage map in the store package as an empty map.
+// add a user with ID "1" to the personStorage map.
+// create a new HTTP DELETE request targeting the "/users/1" URL.
+// create a new responseRecorder to capture the response.
+// serve the DELETE request using the Gin router and capture the response.
+// assert that the response status code captured in the responseRecorder is equal to http.StatusOK, indicating a successful response.
+// check if the user with ID "1" exists (key) in the personStorage map. Expect the value of ok to be false, indicating that the user has been successfully deleted.
+
 func TestDeleteUser(t *testing.T) {
 	router := gin.Default()
 	router.DELETE("/users/:id", deleteUser)
@@ -208,3 +219,35 @@ func TestDeleteUser(t *testing.T) {
 	assert.False(t, ok)
 }
 
+// create a new Gin router and register a POST route with the path "/users/:id/contracts", assigning the userContractUpload function as the handler.
+// initialize a buffer (reqBody) to store the request body.
+// create a multipart form writer and associate it with the buffer.
+// create a form file field named "file" and set the file name to "sample.pdf".
+// write the contents of the file to the form file field and close the form writer to finalize the form data.
+// create a new HTTP request (req) with the method "POST", the path "/users/1/contracts", and the reqBody as the request body.
+// set the "Content-Type" header of the request to the value returned by writer.FormDataContentType().
+// create a new response recorder to capture the response.
+// serve the HTTP request using the Gin router, and the response is captured in the response recorder.
+// assert that the response status code is http.StatusOK.
+// assert that the response body is equal to the expected message "contract uploaded successfully".
+func TestUserContractUpload(t *testing.T) {
+	router := gin.Default()
+	router.POST("/users/:id/contracts", userContractUpload)
+
+	reqBody := &bytes.Buffer{}
+	writer := multipart.NewWriter(reqBody)
+	fileWriter, _ := writer.CreateFormFile("file", "sample.pdf")
+	fileContents := []byte("sample contract file")
+	fileWriter.Write(fileContents)
+	writer.Close()
+
+	req, _ := http.NewRequest("POST", "/users/1/contracts", reqBody)
+	req.Header.Set("Content-Type", writer.FormDataContentType())
+
+	w := httptest.NewRecorder()
+
+	router.ServeHTTP(w, req)
+
+	assert.Equal(t, http.StatusOK, w.Code)
+	assert.Equal(t, "contract uploaded successfully", w.Body.String())
+}
