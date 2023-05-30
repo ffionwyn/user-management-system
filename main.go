@@ -2,7 +2,6 @@ package main
 
 import (
 	"fmt"
-	"log"
 	"net/http"
 	"path/filepath"
 	"strconv"
@@ -47,14 +46,15 @@ func main() {
 func getUser(c *gin.Context) {
 	id := c.Param("id")
 
-	person, err := store.GetPersonByID(id)
+	user, err := store.GetPersonByID(id)
 	if err != nil {
-		log.Print(err)
-		c.IndentedJSON(http.StatusNotFound, gin.H{"message": "user not found"})
+		c.JSON(http.StatusNotFound, gin.H{"message": "User not found"})
 		return
 	}
-	c.IndentedJSON(http.StatusOK, person)
+	c.JSON(http.StatusOK, user)
 }
+
+
 
 func getAllUsers(c *gin.Context) {
 	c.IndentedJSON(http.StatusOK, store.PersonStorage)
