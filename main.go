@@ -114,5 +114,3 @@ func userContractUpload(c *gin.Context) {
 		}
 		c.String(http.StatusOK, "contract uploaded successfully")
 	}
-
-
