@@ -34,7 +34,7 @@ func TestPerson(t *testing.T) {
 // test case 1 is deleting an existing person and then checks if they have been deleted from the storage
 // test case 2 is deleting a non existing person
 func TestDeletePerson(t *testing.T) {
-	PersonStorage := map[string]Person{
+	PersonStorage = map[string]Person{
 		"1": {
 			FirstName:  "ffion",
 			SecondName: "griffiths",
@@ -54,7 +54,8 @@ func TestDeletePerson(t *testing.T) {
 		t.Errorf("Expected nil error, but got '%v'", err)
 	}
 
-	if _, ok := PersonStorage["1"]; ok {
+	_, exists := PersonStorage["1"]
+	if exists {
 		t.Error("Expected person with UserID '1' to be deleted, but it still exists")
 	}
 
@@ -64,5 +65,4 @@ func TestDeletePerson(t *testing.T) {
 		t.Errorf("Expected error '%s', but got '%v'", expectedError, err)
 	}
 }
-
 
