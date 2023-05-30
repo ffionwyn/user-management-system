@@ -134,4 +134,42 @@ func TestPostUser(t *testing.T) {
 	}, responsePerson)
 }
 
+func TestUpdateUser(t *testing.T) {
+	router := gin.Default()
+	router.PUT("/users/:id", updateUser)
+
+	store.PersonStorage = make(map[string]store.Person)
+	store.PersonStorage["1"] = store.Person{
+		FirstName:  "ffion",
+		SecondName: "griffiths",
+		DOB:        "05/11/1993",
+		Email:      "ffiongriffiths@example.com",
+	}
+
+	requestBody := `{
+		"firstName": "updatedFirstName",
+		"secondName": "updatedSecondName",
+		"dob": "01/01/2000",
+		"email": "updated@example.com"
+	}`
+	req, _ := http.NewRequest("PUT", "/users/1", strings.NewReader(requestBody))
+	req.Header.Set("Content-Type", "application/json")
+
+	w := httptest.NewRecorder()
+
+	router.ServeHTTP(w, req)
+
+	assert.Equal(t, http.StatusCreated, w.Code)
+
+	var responsePerson store.Person
+	err := json.Unmarshal(w.Body.Bytes(), &responsePerson)
+	assert.NoError(t, err)
+
+	updatedUser, ok := store.PersonStorage["1"]
+	assert.True(t, ok)
+	assert.Equal(t, "updatedFirstName", updatedUser.FirstName)
+	assert.Equal(t, "updatedSecondName", updatedUser.SecondName)
+	assert.Equal(t, "01/01/2000", updatedUser.DOB)
+	assert.Equal(t, "updated@example.com", updatedUser.Email)
+}
 
