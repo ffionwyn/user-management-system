@@ -4,6 +4,8 @@ import (
 	"testing"
 )
 
+// person is created, each field is individually checked against the expected value (using if)
+//this is checking if firstName is equal to ffion (the expected name) and repeated for secondName, DOB and email
 func TestPerson(t *testing.T) {
 	person := Person{
 		FirstName:  "ffion",
@@ -29,7 +31,8 @@ func TestPerson(t *testing.T) {
 	}
 }
 
-
+// test case 1 is deleting an existing person and then checks if they have been deleted from the storage
+// test case 2 is deleting a non existing person
 func TestDeletePerson(t *testing.T) {
 	PersonStorage := map[string]Person{
 		"1": {
@@ -60,3 +63,6 @@ func TestDeletePerson(t *testing.T) {
 	if err == nil || err.Error() != expectedError {
 		t.Errorf("Expected error '%s', but got '%v'", expectedError, err)
 	}
+}
+
+
