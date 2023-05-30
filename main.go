@@ -50,7 +50,7 @@ func getUser(c *gin.Context) {
 	person, err := store.GetPersonByID(id)
 	if err != nil {
 		log.Print(err)
-		c.IndentedJSON(http.StatusBadRequest, gin.H{"message": "user not found"})
+		c.IndentedJSON(http.StatusNotFound, gin.H{"message": "user not found"})
 		return
 	}
 	c.IndentedJSON(http.StatusOK, person)
