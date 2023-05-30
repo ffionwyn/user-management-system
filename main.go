@@ -44,20 +44,23 @@ func main() {
 }
 
 func getUser(c *gin.Context) {
-	id := c.Param("id")
-
-	user, err := store.GetPersonByID(id)
-	if err != nil {
-		c.JSON(http.StatusNotFound, gin.H{"message": "User not found"})
+	userID := c.Param("id")
+	user, found := store.PersonStorage[userID]
+	if !found {
+		c.JSON(http.StatusNotFound, gin.H{
+			"message": "User not found",
+		})
 		return
 	}
 	c.JSON(http.StatusOK, user)
 }
 
-
-
 func getAllUsers(c *gin.Context) {
-	c.IndentedJSON(http.StatusOK, store.PersonStorage)
+	var users []store.Person
+	for _, user := range store.PersonStorage {
+		users = append(users, user)
+	}
+	c.JSON(http.StatusOK, users)
 }
 
 func postUser(c *gin.Context){

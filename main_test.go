@@ -6,10 +6,18 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"testing"
+	"user-management/store"
 
 	"github.com/gin-gonic/gin"
 	"github.com/stretchr/testify/assert"
 )
+
+type Person struct {
+	FirstName  string `json:"firstName"`
+	SecondName string `json:"secondName"`
+	DOB        string `json:"dob"`
+	Email      string `json:"email"`
+}
 
 // create new gin router, register a get route with /users/:id and assigns getUser function as the handler
 // create a new instance of the response recorder, which is used to capture the response
@@ -42,5 +50,32 @@ func TestGetUser(t *testing.T) {
 		"message": "User not found",
 	}
 	assert.Equal(t, expected, responseBody)
+}
+
+
+func TestGetAllUsers(t *testing.T) {
+	router := gin.Default()
+	router.GET("/users", getAllUsers)
+
+	store.PersonStorage = map[string]store.Person{
+		"1": {FirstName: "ffion", SecondName: "griffiths", DOB: "05/11/1993", Email: "ffiongriffiths@example.com"},
+		"2": {FirstName: "minnie", SecondName: "griffiths", DOB: "19/10/2018", Email: "minniegriffiths@example.com"},
+	}
+
+	w := httptest.NewRecorder()
+	req, _ := http.NewRequest("GET", "/users", nil)
+	router.ServeHTTP(w, req)
+
+	assert.Equal(t, http.StatusOK, w.Code)
+
+	var users []store.Person
+	err := json.Unmarshal(w.Body.Bytes(), &users)
+	assert.NoError(t, err)
+
+	expected := []store.Person{
+		{FirstName: "ffion", SecondName: "griffiths", DOB: "05/11/1993", Email: "ffiongriffiths@example.com"},
+		{FirstName: "minnie", SecondName: "griffiths", DOB: "19/10/2018", Email: "minniegriffiths@example.com"},
+	}
+	assert.Equal(t, expected, users)
 }
 
